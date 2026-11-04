@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>گود</title>
+<style>
+:root{--bg:#f6f4ee;--card:#fff;--tx:#1d1d1f;--mut:#6b6b70;--ac:#0f766e;--bd:#e4e1d8;--star:#b45309;--starbg:#fef3c7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101214;--card:#1a1d20;--tx:#f0f0f0;--mut:#9aa0a6;--ac:#2dd4bf;--bd:#2b2f33;--star:#fbbf24;--starbg:#3a2e0b}}
+:root[data-theme="dark"]{--bg:#101214;--card:#1a1d20;--tx:#f0f0f0;--mut:#9aa0a6;--ac:#2dd4bf;--bd:#2b2f33;--star:#fbbf24;--starbg:#3a2e0b}
+*{box-sizing:border-box}html{color-scheme:light dark}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Tahoma,"Segoe UI",Arial,sans-serif;line-height:1.6}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;max-width:760px;margin:auto}
+.logo{font-size:28px;font-weight:700;color:var(--ac)}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:6px 12px;font-size:14px}
+.box b{color:var(--ac)}
+button{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;padding:8px 12px}
+button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+main{max-width:760px;margin:auto;padding:0 16px 24px}
+input{width:100%;font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);margin:8px 0}
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:10px 0}
+.panel h3{margin:0 0 4px}.panel p{margin:0 0 6px;color:var(--mut);font-size:14px}
+.key{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.key.star{background:var(--starbg);border-color:var(--star)}
+.key code{direction:ltr;flex:1;min-width:140px;font-size:16px;font-family:ui-monospace,Menlo,monospace}
+.key .st{color:var(--star);font-size:20px}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.ad{min-height:90px;margin:12px 0;text-align:center}
+.foot{max-width:760px;margin:auto;padding:16px;text-align:center;border-top:1px solid var(--bd)}
+.foot a{display:inline-flex;gap:6px;margin:4px;padding:8px 14px;border-radius:999px;border:1px solid var(--bd);background:var(--card);color:var(--tx);text-decoration:none}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal.on{display:flex}.modal>div{background:var(--card);border-radius:14px;padding:18px;max-width:340px;width:100%;text-align:center}
+.ic{width:20px;height:20px;flex:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.grid a,.grid button{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);text-decoration:none;font:inherit;cursor:pointer}
+.foot a{align-items:center}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 16px;border-radius:999px;display:none;z-index:30}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="logo">گود</div>
+  <div class="box">👁 الزوار: <b id="vc">…</b></div>
+  <button id="th">🌓</button>
+</div>
+<main>
+  <div class="panel">
+    <h3>🔄 تبادل الأكواد</h3>
+    <p>حط كود عندك (شغّال) واحصل على كود من زائر تاني.</p>
+    <input id="mine" placeholder="كودك هنا" dir="ltr" maxlength="64">
+    <button class="p" id="swap">تبادل</button>
+    <div id="got"></div>
+  </div>
+
+  <!-- مكان الإعلان: الصقي هنا كود الإعلان من شبكة الإعلانات (مثل AdSense) -->
+  <div class="ad" id="ad1"></div>
+
+  <input id="q" placeholder="ابحث عن كود…" dir="ltr">
+  <div id="list"></div>
+  <div style="text-align:center"><button id="more">عرض المزيد</button></div>
+</main>
+<div class="foot">
+  <div>تابعنا</div>
+  <a data-ic="instagram" href="https://www.instagram.com/remoo.1311?exln=MWFjajdxNGIwZW9jZw==" target="_blank" rel="noopener"><span>إنستجرام</span></a>
+  <a data-ic="tiktok" href="https://tiktok.com/@remoo1113" target="_blank" rel="noopener"><span>تيك توك</span></a>
+</div>
+<div class="modal" id="m"><div id="mc"></div></div>
+<div class="toast" id="t"></div>
+<script>
+const SB="https://vqfauwlyrgvawajxooaf.supabase.co",KEY="sb_publishable_JFCTeEO7nqotiKv5680hYw_NgLjXWV0";
+async function rpc(fn,args){
+  const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
+  if(!r.ok)throw new Error(await r.text());return r.json();
+}
+const $=s=>document.querySelector(s);
+const toast=m=>{const t=$("#t");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",1800)};
+async function copy(s){try{await navigator.clipboard.writeText(s)}catch(e){const a=document.createElement("textarea");a.value=s;document.body.appendChild(a);a.select();try{document.execCommand("copy")}catch(_){}a.remove()}toast("تم النسخ ✓")}
+const pageUrl=()=>location.href.split("#")[0];
+// أيقونات المنصات الأصلية (Simple Icons)
+const P={
+instagram:["#E4405F","M7.03.084c-1.277.06-2.149.264-2.91.563a5.9 5.9 0 0 0-2.124 1.388 5.9 5.9 0 0 0-1.38 2.127C.321 4.926.12 5.8.064 7.076s-.069 1.688-.063 4.947.021 3.667.083 4.947c.061 1.277.264 2.149.563 2.911.308.789.72 1.457 1.388 2.123a5.9 5.9 0 0 0 2.129 1.38c.763.295 1.636.496 2.913.552 1.278.056 1.689.069 4.947.063s3.668-.021 4.947-.082c1.28-.06 2.147-.265 2.91-.563a5.9 5.9 0 0 0 2.123-1.388 5.9 5.9 0 0 0 1.38-2.129c.295-.763.496-1.636.551-2.912.056-1.28.07-1.69.063-4.948-.006-3.258-.02-3.667-.081-4.947-.06-1.28-.264-2.148-.564-2.911a5.9 5.9 0 0 0-1.387-2.123 5.86 5.86 0 0 0-2.128-1.38C19.074.322 18.202.12 16.924.066 15.647.009 15.236-.006 11.977 0S8.31.021 7.03.084m.14 21.693c-1.17-.05-1.805-.245-2.228-.408a3.7 3.7 0 0 1-1.382-.895 3.7 3.7 0 0 1-.9-1.378c-.165-.423-.363-1.058-.417-2.228-.06-1.264-.072-1.644-.08-4.848-.006-3.204.006-3.583.061-4.848.05-1.169.246-1.805.408-2.228.216-.561.477-.96.895-1.382a3.7 3.7 0 0 1 1.379-.9c.423-.165 1.057-.361 2.227-.417 1.265-.06 1.644-.072 4.848-.08 3.203-.006 3.583.006 4.85.062 1.168.05 1.804.244 2.227.408.56.216.96.475 1.382.895s.681.817.9 1.378c.165.422.362 1.056.417 2.227.06 1.265.074 1.645.08 4.848.005 3.203-.006 3.583-.061 4.848-.051 1.17-.245 1.805-.408 2.23-.216.56-.477.96-.896 1.38a3.7 3.7 0 0 1-1.378.9c-.422.165-1.058.362-2.226.418-1.266.06-1.645.072-4.85.079s-3.582-.006-4.848-.06m9.783-16.192a1.44 1.44 0 1 0 1.437-1.442 1.44 1.44 0 0 0-1.437 1.442M5.839 12.012a6.161 6.161 0 1 0 12.323-.024 6.162 6.162 0 0 0-12.323.024M8 12.008A4 4 0 1 1 12.008 16 4 4 0 0 1 8 12.008"],
+tiktok:["currentColor","M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07"],
+whatsapp:["#25D366","M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52s.198-.298.298-.497c.099-.198.05-.371-.025-.52s-.669-1.612-.916-2.207c-.242-.579-.487-.5-.669-.51a13 13 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074s2.096 3.2 5.077 4.487c.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413s.248-1.289.173-1.413c-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.82 11.82 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.9 11.9 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.82 11.82 0 0 0-3.48-8.413"],
+facebook:["#1877F2","M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a9 9 0 0 1 1.141.195v3.325a9 9 0 0 0-.653-.036 27 27 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.7 1.7 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647"],
+x:["currentColor","M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"],
+telegram:["#26A5E4","M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm4.962 7.224c.1-.002.321.023.465.14a.5.5 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024q-.159.037-5.061 3.345-.72.495-1.302.48c-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789q.04-.324.893-.663 5.247-2.286 6.998-3.014c3.332-1.386 4.025-1.627 4.476-1.635"]
+};
+const ico=n=>`<svg class="ic" viewBox="0 0 24 24" fill="${P[n][0]}" aria-hidden="true"><path d="${P[n][1]}"/></svg>`;
+document.querySelectorAll("[data-ic]").forEach(a=>a.insertAdjacentHTML("afterbegin",ico(a.dataset.ic)));
+
+async function share(code){
+  if(navigator.share){try{await navigator.share({title:"گود",text:"كود نسك: "+code,url:pageUrl()});return}catch(e){}}
+  const txt=encodeURIComponent("كود نسك: "+code+" — من موقع گود"),u=encodeURIComponent(pageUrl());
+  const L=[["whatsapp","واتساب","https://wa.me/?text="+txt+"%20"+u],["facebook","فيسبوك","https://www.facebook.com/sharer/sharer.php?u="+u],["x","تويتر (X)","https://twitter.com/intent/tweet?text="+txt+"&url="+u],["telegram","تليجرام","https://t.me/share/url?url="+u+"&text="+txt]];
+  const links=L.map(l=>`<a href="${l[2]}" target="_blank" rel="noopener">${ico(l[0])}<span>${l[1]}</span></a>`).join("");
+  const apps=`<button data-open="https://www.instagram.com/">${ico("instagram")}<span>إنستجرام</span></button><button data-open="https://www.tiktok.com/">${ico("tiktok")}<span>تيك توك</span></button>`;
+  $("#mc").innerHTML=`<h3>مشاركة الكود</h3><div class="grid">${links}${apps}</div><p style="color:var(--mut);font-size:13px">إنستجرام وتيك توك: بننسخ الكود وتفتح التطبيق وتلصقيه.</p><button class="p" id="mx">إغلاق</button>`;
+  $("#mc").querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{copy(code);window.open(b.dataset.open,"_blank","noopener")});
+  $("#m").classList.add("on");$("#mx").onclick=()=>$("#m").classList.remove("on");
+}
+$("#m").onclick=e=>{if(e.target.id==="m")$("#m").classList.remove("on")};
+function keyRow(o){
+  const d=document.createElement("div");d.className="key"+(o.featured?" star":"");
+  d.innerHTML=(o.featured?'<span class="st">★</span>':"")+'<code></code><div class="row"><button class="p">نسخ</button><button>مشاركة</button></div>';
+  d.querySelector("code").textContent=o.code;
+  const[b1,b2]=d.querySelectorAll("button");b1.onclick=()=>copy(o.code);b2.onclick=()=>share(o.code);return d;
+}
+let offset=0,q="";
+async function load(reset){
+  if(reset){offset=0;$("#list").innerHTML=""}
+  try{
+    const rows=await rpc("good_list",{p_limit:50,p_offset:offset,p_q:q});
+    rows.forEach(o=>$("#list").appendChild(keyRow(o)));
+    offset+=rows.length;$("#more").style.display=rows.length===50?"":"none";
+  }catch(e){toast("تعذر تحميل الأكواد")}
+}
+let tm;$("#q").oninput=e=>{clearTimeout(tm);tm=setTimeout(()=>{q=e.target.value.trim();load(true)},300)};
+$("#more").onclick=()=>load(false);
+// device id (for exchange only)
+let dev;try{dev=localStorage.getItem("dev");if(!dev){dev=crypto.randomUUID();localStorage.setItem("dev",dev)}}catch(e){dev=String(Math.random())}
+$("#swap").onclick=async()=>{
+  const c=$("#mine").value.trim();
+  if(!/^[A-Za-z0-9_-]{4,64}$/.test(c)){toast("الكود غير صالح (حروف وأرقام و - _ فقط)");return}
+  $("#swap").disabled=true;
+  try{
+    const got=await rpc("good_exchange",{p_code:c,p_device:dev});
+    $("#got").innerHTML="";
+    if(got){$("#got").appendChild(keyRow({code:got,featured:false}))}else toast("تمت إضافة كودك ✓ — مفيش كود جديد متاح حالياً");
+    $("#mine").value="";load(true);
+  }catch(e){toast("حصل خطأ، حاول تاني")}
+  $("#swap").disabled=false;
+};
+// theme
+const root=document.documentElement;
+try{const s=localStorage.getItem("th");if(s)root.dataset.theme=s}catch(e){}
+$("#th").onclick=()=>{const dark=root.dataset.theme?root.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;root.dataset.theme=dark?"light":"dark";try{localStorage.setItem("th",root.dataset.theme)}catch(e){}};
+// visitors: every visit counts, repeats included
+rpc("good_visit").then(n=>$("#vc").textContent=Number(n).toLocaleString("ar-EG")).catch(()=>rpc("good_count").then(n=>$("#vc").textContent=Number(n).toLocaleString("ar-EG")).catch(()=>$("#vc").textContent="—"));
+load(true);
+</script>
+</body>
+</html>
